@@ -22,7 +22,7 @@
 }
   
 .dragDropFiles {
-    width: 300px;
+    min-width: 300px;
     height: 300px;
     position: relative;
     text-align: center;
@@ -37,7 +37,7 @@
         color 200ms ease-out;
     outline: 0px dashed var(--principal50);
     color: inherit;
-    outline: 0px dashed var(--negroClaro2);
+    outline: 3px dashed var(--negro25);
 }
 
 .dragDropFiles:hover,
@@ -66,37 +66,35 @@
     color: white;
     transition: color 300ms ease;
 }
-
-.dragDropFiles div:first-child {
+.imagePreview__main{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
     position: relative;
     height: 100%;
+    border-radius: 5px;
+    max-width: 100%;
+    padding: 5px;
+    gap:5px;   
+}
+
+
+.imagePreview__main .imagePreview__item {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    position: relative;
+    height: 100%;
     border-radius: 5px;
     /* background-color: var(--blanco50); */
-    padding: 5px;
     max-width: 100%;
 }
 
-.dragDropFiles div img {
-    /* height: 100%; */
-    border-radius: 5px;
-    max-width: 100%;
-    max-height: 80%;
-}
-
-.dragDropFiles div .imagePreview {
-    background-size: 100% auto;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 80%;
-    width: 100%;
-}
-
-.dragDropFiles div .closePreview {
+.imagePreview__main .closePreview {
     position: absolute;
+    top: 0;
     align-self: flex-end;
     border-radius: 100%;
     background-color: black;
@@ -104,16 +102,27 @@
     height: 20px;
     opacity: 0.5;
     pointer-events: all;
+    transition: opacity 300ms ease;
 }
 
-.dragDropFiles div .closePreview:hover {
-    opacity: 1 !important;
-
+.imagePreview__main .closePreview:hover {
+    opacity: 1;
 }
 
-.dragDropFiles div .closePreview:after {
+.imagePreview__main .closePreview:after {
     content: "\274c";
     /* use the hex value here... */
-    font-size: 8px;
+    font-size: 10px;
     color: red;
+    text-align: center;
+    position: absolute;
+    top: 3px;
+    right: 3px;
+
+}
+.imagePreview__item img {
+    /* height: 100%; */
+    border-radius: 5px;
+    max-width: 150px;
+    max-height: 80%;
 }
