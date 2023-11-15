@@ -1,5 +1,6 @@
 var dropContainers = document.querySelectorAll(".dragDropFiles");
 var isMultiple = false
+var currentFilesBeforeClick = 0
 
 dropContainers.forEach(dropContainer => {
   // Se inserta la información de las indicacionese
@@ -64,11 +65,9 @@ document.addEventListener('drop', (e) => {
 
     var input = dragDropElement.querySelector("input[type=file]") 
     var currentFiles = e.dataTransfer.files
-    addFiles(input, currentFiles, "drop")
+    addFiles(input, input.files, currentFiles, "drop")
     
-    
-    console.log(input.files)
-    showFiles(currentFiles, dragDropElement);
+    showFiles(input.files, dragDropElement);
   }
 });
 
@@ -83,30 +82,33 @@ document.addEventListener('click', (e) => {
     var mainPreview = dragDropElement.querySelector("div.imagePreview__main")
     const child = e.target.closest("div.imagePreview__item")
     child.remove()
-    // input.value = ""
-    // console.log(input)
     if (input.files == 0) {
       mainPreview.appendChild(createPTag())
     }
     return
   }
   if (dragDropElement) {
-    var input = dragDropElement.querySelector("input[type=file]");
-    input.click()
+    currentFilesBeforeClick = dragDropElement.querySelector("input[type=file]").files
+    dragDropElement.querySelector("input[type=file]").click()
   }
 });
 
 document.addEventListener('change', (e) => {
   var dragDropElement = e.target.closest(".dragDropFiles");
   if (dragDropElement) {
-    var input = dragDropElement.querySelector("input[type=file]")
-    var currentFiles = new DataTransfer()
-    console.log("input.files")
-    console.log(input.files)
-    addFiles(input, currentFiles.file, "click")
-    console.log(input.files)
-    // showFiles(input, dragDropElement)
-    // console.log(files)
+    var auxDataTransfer = new DataTransfer();
+    var input = dragDropElement.querySelector("input[type=file]");
+    var newFiles = e.target.files
+
+    if (newFiles.length == 0) {
+      return
+    }
+    for (const file of currentFilesBeforeClick) {
+      auxDataTransfer.items.add(file)
+    }
+    addFiles(input, auxDataTransfer.files, newFiles)
+
+    showFiles(input.files, dragDropElement)
   }
 });
 
@@ -118,13 +120,19 @@ function showFiles(files ,dragDropElement) {
     alert("Solo se acepta un archivo a la vez")
     return
   }
-  for (let i = 0; i < files.length; i++) {
-    processFile( files[i], dragDropElement)
+  var mainPreview = dragDropElement.querySelector('div.imagePreview__main')
+  var itemsPreview = mainPreview.querySelectorAll('div.imagePreview__item')
+  if (itemsPreview.length > 0) {
+    for (const itemPreview of itemsPreview) {
+      itemPreview.remove()
+    }
   }
-  return
+  for (const file of files) {
+    processFile( file, dragDropElement, mainPreview)
+  }
 }
 
-function processFile(file, dragDropElement) {
+function processFile(file, dragDropElement, mainPreview) {
   const fileExtension = file.type;
   const validExtensions = ['image/jpeg','image/jpg','image/png','image/gif','image/webp']
   if (!validExtensions.includes(fileExtension)) {
@@ -139,7 +147,7 @@ function processFile(file, dragDropElement) {
   const fileReader = new FileReader();
   fileReader.readAsDataURL(file);
   fileReader.addEventListener('load', () => {
-    var mainPreview = dragDropElement.querySelector('div.imagePreview__main')
+    
     const fileUrl = fileReader.result;
     const image = `
         <span class="closePreview"></span>
@@ -148,32 +156,24 @@ function processFile(file, dragDropElement) {
     `;
     var itemPreview = document.createElement("div")
     itemPreview.classList = "imagePreview__item"
-    if (!isMultiple && mainPreview.querySelectorAll('div.imagePreview__item').length > 0) {
-      itemPreview = mainPreview.querySelector('div.imagePreview__item');
-      itemPreview.innerHTML = "";
-    }
     itemPreview.innerHTML += image;
     mainPreview.appendChild(itemPreview)
   });
 }
 
-function addFiles(input, currentFiles, action) {
-  if (!isMultiple) {
+function addFiles(input, previousFiles, currentFiles) {
+  if (!isMultiple || previousFiles.length == 0) {
     input.files = currentFiles
     return
   }
   var dataTransfer = new DataTransfer();
-  if (input.files.length == 0) 
-    input.files = currentFiles
-  else {
-    console.log("pasa directo desde el click")
-    for (const file of input.files) {
-      dataTransfer.items.add(file)
-    }
-    for (const currentFile of currentFiles) {
-      dataTransfer.items.add(currentFile)
-    }
-    input.files = dataTransfer.files
+  // console.log("Segunda vuelta")
+  for (const file of previousFiles) {
+    dataTransfer.items.add(file)
   }
+  for (const currentFile of currentFiles) {
+    dataTransfer.items.add(currentFile)
+  }
+  input.files = dataTransfer.files
 
 }
