@@ -25,11 +25,7 @@ dropContainers.forEach(dropContainer => {
   dropContainer.appendChild(mainContainer)
 });
 
-function createPTag() {
-  var pTag = document.createElement("p")
-  pTag.innerHTML = "<strong>Arrastra y suelta <br> o <br>da click para subir los archivos</strong>"
-  return pTag
-}
+
 
 document.addEventListener('dragover', (e) => {
   e.preventDefault(); // Evitar el comportamiento predeterminado del navegador
@@ -78,16 +74,40 @@ document.addEventListener('click', (e) => {
   var dragDropElement = e.target.closest(".dragDropFiles")
 
   if (closePreview) {
-    var input = dragDropElement.querySelector("input[type=file]");
-    var mainPreview = dragDropElement.querySelector("div.imagePreview__main")
+    var currentItemsArray = Array.from(dragDropElement.querySelectorAll("div.imagePreview__item"))
     const child = e.target.closest("div.imagePreview__item")
-    child.remove()
-    if (input.files == 0) {
+
+    if (currentItemsArray.length == 1) {
+      var mainPreview = e.target.closest("div.imagePreview__main")
       mainPreview.appendChild(createPTag())
     }
-    return
+    
+    child.remove()
+    
+    var input = dragDropElement.querySelector("input[type=file]")
+    var currentItemsInput = Array.from(input.files)    
+    var currentItemsArray = Array.from(dragDropElement.querySelectorAll("div.imagePreview__item"))
+    let itemsTitle = []
+    let itemsInput = []
+
+    console.log(currentItemsInput)
+    
+    currentItemsInput.map((file)=> { itemsInput.push(file.name) })
+    currentItemsArray.map((item)=> { itemsTitle.push(item.children[2].title) })
+    for (let i = 0; i < itemsInput.length; i++) {
+      if (itemsInput[i] != itemsTitle[i] || itemsTitle[i] === undefined) {
+        currentItemsInput.splice(i,1)
+        break;
+      }
+    }
+    var dataTransfer = new DataTransfer();
+    currentItemsInput.map((file) => {dataTransfer.items.add(file)})
+    input.files = dataTransfer.files
+    console.log(input.files)
+    return 
   }
   if (dragDropElement) {
+    e.stopPropagation();
     currentFilesBeforeClick = dragDropElement.querySelector("input[type=file]").files
     dragDropElement.querySelector("input[type=file]").click()
   }
@@ -101,6 +121,7 @@ document.addEventListener('change', (e) => {
     var newFiles = e.target.files
 
     if (newFiles.length == 0) {
+      input.files = currentFilesBeforeClick
       return
     }
     for (const file of currentFilesBeforeClick) {
@@ -146,25 +167,13 @@ function processFile(file, dragDropElement, mainPreview) {
   const fileReader = new FileReader();
   fileReader.readAsDataURL(file);
   fileReader.addEventListener('load', () => {
-    const splitCurrentFileName = file.name.split('.')
-    const extension = splitCurrentFileName[splitCurrentFileName.length - 1]
-    var fileName = ""
-    var finalCurrentFileName = ""
-    for (let i = 0; i < splitCurrentFileName.length-1; i++) {
-      const word = splitCurrentFileName[i];
-      fileName += word
-    }
-    if (fileName.length > 14) {
-      finalCurrentFileName = `${fileName.substring(0,14)}... .${extension}`
-    } else {
-      finalCurrentFileName = file.name
-    }
+    const shotName = cutName(file)
     
     const fileUrl = fileReader.result;
     const image = `
         <span class="closePreview"></span>
           <img src="${fileUrl}" alt="${file.name}">
-        <span title="${file.name}">${finalCurrentFileName}</span>
+        <span title="${file.name}">${shotName}</span>
     `;
     var itemPreview = document.createElement("div")
     itemPreview.classList = "imagePreview__item"
@@ -172,6 +181,7 @@ function processFile(file, dragDropElement, mainPreview) {
     mainPreview.appendChild(itemPreview)
   });
 }
+
 
 function addFiles(input, previousFiles, currentFiles) {
   if (!isMultiple || previousFiles.length == 0) {
@@ -186,4 +196,21 @@ function addFiles(input, previousFiles, currentFiles) {
     dataTransfer.items.add(currentFile)
   }
   input.files = dataTransfer.files
+}
+
+function cutName(file) {
+  const splitCurrentFileName = file.name.split('.')
+  const extension = splitCurrentFileName[splitCurrentFileName.length - 1]
+  var fileName = ""
+  for (let i = 0; i < splitCurrentFileName.length-1; i++) {
+    const word = splitCurrentFileName[i];
+    fileName += word
+  }
+  return fileName.length > 14 ? `${fileName.substring(0,14)}... .${extension}`: file.name;
+}
+
+function createPTag() {
+  var pTag = document.createElement("p")
+  pTag.innerHTML = "<strong>Arrastra y suelta <br> o <br>da click para subir los archivos</strong>"
+  return pTag
 }
