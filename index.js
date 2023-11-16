@@ -142,17 +142,20 @@ function processFile(file, dragDropElement, mainPreview) {
   if (dragDropElement.querySelector('p') != undefined) {
     dragDropElement.querySelector('p').remove();
   }
-  
   // Crear un objeto de tipo FileReader
   const fileReader = new FileReader();
   fileReader.readAsDataURL(file);
   fileReader.addEventListener('load', () => {
     const splitCurrentFileName = file.name.split('.')
-    const lastSplit = splitCurrentFileName[splitCurrentFileName.length - 1]
-    console.log(splitCurrentFileName)
+    const extension = splitCurrentFileName[splitCurrentFileName.length - 1]
+    var fileName = ""
     var finalCurrentFileName = ""
-    if (file.name.length > 20) {
-      finalCurrentFileName = `${file.name.substring(0,20)}... .${lastSplit}`
+    for (let i = 0; i < splitCurrentFileName.length-1; i++) {
+      const word = splitCurrentFileName[i];
+      fileName += word
+    }
+    if (fileName.length > 14) {
+      finalCurrentFileName = `${fileName.substring(0,14)}... .${extension}`
     } else {
       finalCurrentFileName = file.name
     }
@@ -160,7 +163,7 @@ function processFile(file, dragDropElement, mainPreview) {
     const fileUrl = fileReader.result;
     const image = `
         <span class="closePreview"></span>
-        <img src="${fileUrl}" alt="${file.name}">
+          <img src="${fileUrl}" alt="${file.name}">
         <span title="${file.name}">${finalCurrentFileName}</span>
     `;
     var itemPreview = document.createElement("div")
@@ -176,7 +179,6 @@ function addFiles(input, previousFiles, currentFiles) {
     return
   }
   var dataTransfer = new DataTransfer();
-  // console.log("Segunda vuelta")
   for (const file of previousFiles) {
     dataTransfer.items.add(file)
   }
@@ -184,5 +186,4 @@ function addFiles(input, previousFiles, currentFiles) {
     dataTransfer.items.add(currentFile)
   }
   input.files = dataTransfer.files
-
 }

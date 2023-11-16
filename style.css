@@ -124,7 +124,7 @@
 .imagePreview__item img {
     /* height: 100%; */
     border-radius: 5px;
-    max-width: 150px;
+    max-width: 175px;
     max-height: 80%;
 }
 .imagePreview__item span {
