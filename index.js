@@ -147,12 +147,21 @@ function processFile(file, dragDropElement, mainPreview) {
   const fileReader = new FileReader();
   fileReader.readAsDataURL(file);
   fileReader.addEventListener('load', () => {
+    const splitCurrentFileName = file.name.split('.')
+    const lastSplit = splitCurrentFileName[splitCurrentFileName.length - 1]
+    console.log(splitCurrentFileName)
+    var finalCurrentFileName = ""
+    if (file.name.length > 20) {
+      finalCurrentFileName = `${file.name.substring(0,20)}... .${lastSplit}`
+    } else {
+      finalCurrentFileName = file.name
+    }
     
     const fileUrl = fileReader.result;
     const image = `
         <span class="closePreview"></span>
         <img src="${fileUrl}" alt="${file.name}">
-        <span name="texto nombre">${file.name}</span>
+        <span title="${file.name}">${finalCurrentFileName}</span>
     `;
     var itemPreview = document.createElement("div")
     itemPreview.classList = "imagePreview__item"

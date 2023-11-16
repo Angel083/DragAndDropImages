@@ -127,3 +127,6 @@
     max-width: 150px;
     max-height: 80%;
 }
+.imagePreview__item span {
+    pointer-events: all;
+}
