@@ -23,9 +23,36 @@ dropContainers.forEach(dropContainer => {
   }
   mainContainer.appendChild(inputFile)
   dropContainer.appendChild(mainContainer)
+  
+  var files = dropContainer.getAttribute("files")
+  
+  if (files != null) {
+    var path = dropContainer.getAttribute("path")
+    console.log("Tiene data, hacer pull")
+    obtenerBlob(files,path)
+    .then(response => {
+      var auxDataTransfer = new DataTransfer();
+      var auxDataTransferVoid = new DataTransfer();
+      auxDataTransfer.items.add(response)
+      var input = dropContainer.querySelector("input[type=file]")
+      addFiles(input, auxDataTransferVoid.files, auxDataTransfer.files)
+      showFiles(auxDataTransfer.files, dropContainer);
+      
+    console.log(input.files)
+    });
+  }
+  // 
 });
 
-
+async function obtenerBlob(files,path) {
+  let blob = await fetch(path+files)
+  .then(r => r.blob())
+  .then(blobFile => {
+      const file = new File([blobFile], files, { type: "image/png"})
+      return file
+    })
+  return blob
+}        
 
 document.addEventListener('dragover', (e) => {
   e.preventDefault(); // Evitar el comportamiento predeterminado del navegador
@@ -89,8 +116,6 @@ document.addEventListener('click', (e) => {
     var currentItemsArray = Array.from(dragDropElement.querySelectorAll("div.imagePreview__item"))
     let itemsTitle = []
     let itemsInput = []
-
-    console.log(currentItemsInput)
     
     currentItemsInput.map((file)=> { itemsInput.push(file.name) })
     currentItemsArray.map((item)=> { itemsTitle.push(item.children[2].title) })
@@ -103,7 +128,6 @@ document.addEventListener('click', (e) => {
     var dataTransfer = new DataTransfer();
     currentItemsInput.map((file) => {dataTransfer.items.add(file)})
     input.files = dataTransfer.files
-    console.log(input.files)
     return 
   }
   if (dragDropElement) {
